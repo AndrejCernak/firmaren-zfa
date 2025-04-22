@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const PDFDocument = require('pdfkit');
 const bodyParser = require('body-parser');
-const { startEmailTracker } = require('./email-tracker'); // ✅ Add this
+const { startEmailTracker } = require('./email-tracker'); 
 
 require('dotenv').config();
 
@@ -10,10 +10,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// ✅ Start email tracker
-startEmailTracker(); // 📨 Starts the 30-second email check
+startEmailTracker();
 
-// ✅ ZFA PDF generator route (unchanged)
 app.post('/generate-zfa', (req, res) => {
   const { email, price } = req.body;
 

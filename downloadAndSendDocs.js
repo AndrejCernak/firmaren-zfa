@@ -44,7 +44,6 @@ async function downloadAndSendDocs(orderNumber, docId, customerEmail) {
     return;
   }
 
-  // 🟡 Activate session manually
   const sessionUrl = `https://www.firmaren.sk/objednavka/dokumenty?o=${docId}&d=true`;
   try {
     await axios.get(sessionUrl, {
@@ -58,7 +57,7 @@ async function downloadAndSendDocs(orderNumber, docId, customerEmail) {
     return;
   }
 
-  // 🔽 Download PDFs
+  // Download PDFs
   for (const file of fileSuffixes) {
     const fileUrl = `https://www.firmaren.sk/order/download/${docId}?f=bfg-company-services_${file}`;
     const filePath = path.join(saveDir, file);
@@ -102,7 +101,7 @@ async function downloadAndSendDocs(orderNumber, docId, customerEmail) {
     return;
   }
 
-  // 📧 Email the PDFs
+  // Email the PDFs
   const transporter = nodemailer.createTransport({
     host: process.env.IMAP_HOST,
     port: 465,
