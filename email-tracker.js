@@ -82,21 +82,40 @@ async function checkInbox() {
 
       const recipientEmail = rows[0].email;
 
-      // Variant 1: Document download + attachments
+      // ✅ VARIANT 1 – Handle document download
       if (variant === 1) {
-        const docIdMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/order\/download\/([a-zA-Z0-9]+)/);
-        if (!docIdMatch) {
-          console.log("❌ Document ID not found.");
+        // STEP 1: Match and extract the full stats-of-click link
+        const fullLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/stats-of-click\?[^ \n]+/);
+        if (!fullLinkMatch) {
+          console.log("❌ Stats-of-click link not found.");
           continue;
         }
+
+        // STEP 2: Extract the url= part
+        const urlParamMatch = fullLinkMatch[0].match(/url=([^&\s]+)/);
+        if (!urlParamMatch) {
+          console.log("❌ Could not extract encoded url= from stats-of-click.");
+          continue;
+        }
+
+        // STEP 3: Decode it
+        const decodedUrl = decodeURIComponent(urlParamMatch[1]);
+
+        // STEP 4: Extract docId from decoded ?o=
+        const docIdMatch = decodedUrl.match(/[?&]o=([a-zA-Z0-9]+)/);
+        if (!docIdMatch) {
+          console.log("❌ Document ID not found in decoded URL.");
+          continue;
+        }
+
         const docId = docIdMatch[1];
         console.log("📥 Found docId:", docId);
 
         await downloadAndSendDocs(orderNumber, docId, recipientEmail);
-        continue; // skip regular response
+        continue;
       }
 
-      // Variants 2–5: simple response
+      // ✅ VARIANTS 2–5 – Simple email reply
       const emailText = responses[variant];
 
       const transporter = nodemailer.createTransport({
