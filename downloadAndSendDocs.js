@@ -82,9 +82,9 @@ async function checkInbox() {
 
       const recipientEmail = rows[0].email;
 
-      // Variant 1: Document download + attachments
+      // Variant 1: document download
       if (variant === 1) {
-        const docIdMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/order\/download\/([a-zA-Z0-9]+)/);
+        const docIdMatch = fullText.match(/o=([a-zA-Z0-9]{10,})/);
         if (!docIdMatch) {
           console.log("❌ Document ID not found.");
           continue;
@@ -93,10 +93,10 @@ async function checkInbox() {
         console.log("📥 Found docId:", docId);
 
         await downloadAndSendDocs(orderNumber, docId, recipientEmail);
-        continue; // skip regular response
+        continue; // skip regular message
       }
 
-      // Variants 2–5: simple response
+      // Simple variants 2–5
       const emailText = responses[variant];
 
       const transporter = nodemailer.createTransport({
