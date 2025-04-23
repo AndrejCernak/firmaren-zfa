@@ -16,71 +16,11 @@ async function downloadAndSendDocs(orderNumber, docId, customerEmail) {
 
   const downloadedPaths = [];
 
-  const statsClickUrl = `https://www.firmaren.sk/stats-of-click?utm_source=Firmaren-ZalozenieSro&utm_medium=Email239-zaslaniedokumentov&utm_campaign=Button&url=https%3A%2F%2Fwww.firmaren.sk%2Fobjednavka%2Fdokumenty%3Fo%3D${docId}%26d%3Dtrue`;
-
-  let jsessionId = "";
-
-  try {
-    const res = await axios.get(statsClickUrl, {
-      maxRedirects: 0,
-      validateStatus: (status) => status >= 200 && status < 400,
-    });
-
-    const setCookie = res.headers["set-cookie"];
-    if (setCookie) {
-      const match = setCookie.find((c) => c.includes("JSESSIONID"));
-      if (match) {
-        jsessionId = match.split(";")[0];
-        console.log("🍪 JSESSIONID:", jsessionId);
-      }
-    }
-  } catch (err) {
-    console.error("❌ Could not retrieve session cookie:", err.message);
-    return;
-  }
-
-  if (!jsessionId) {
-    console.error("❌ No JSESSIONID found.");
-    return;
-  }
-
-  const sessionUrl = `https://www.firmaren.sk/objednavka/dokumenty?o=${docId}&d=true`;
-  try {
-    await axios.get(sessionUrl, {
-      headers: {
-        Cookie: jsessionId,
-      },
-    });
-    console.log("✅ Session activated by visiting dokumenty page.");
-  } catch (err) {
-    console.error("❌ Failed to activate session:", err.message);
-    return;
-  }
-
-  // Download PDFs
   for (const file of fileSuffixes) {
-    const fileUrl = `https://www.firmaren.sk/order/download/${docId}?f=bfg-company-services_${file}`;
+    const url = `https://www.firmaren.sk/order/download/${docId}?f=bfg-company-services_${file}`;
     const filePath = path.join(saveDir, file);
     try {
-      const res = await axios.get(fileUrl, {
-        responseType: "stream",
-        headers: {
-          Cookie: jsessionId,
-          Accept: "application/pdf",
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-          Referer: `https://www.firmaren.sk/objednavka/dokumenty?o=${docId}&d=true`,
-        },
-        validateStatus: (status) => status >= 200 && status < 400,
-      });
-      
-
-      const type = res.headers["content-type"] || "";
-      if (!type.includes("pdf")) {
-        console.error(`❌ Not a PDF: ${type}`);
-        continue;
-      }
-
+      const res = await axios.get(url, { responseType: "stream" });
       const writer = fs.createWriteStream(filePath);
       res.data.pipe(writer);
 
@@ -89,19 +29,17 @@ async function downloadAndSendDocs(orderNumber, docId, customerEmail) {
         writer.on("error", reject);
       });
 
-      console.log(`✅ Saved ${file} (${fs.statSync(filePath).size} bytes)`);
       downloadedPaths.push(filePath);
     } catch (err) {
-      console.error(`❌ Failed to download ${file}:`, err.message);
+      console.error("❌ Failed to download", url, err.message);
     }
   }
 
   if (downloadedPaths.length === 0) {
-    console.error("❌ No valid PDFs downloaded.");
+    console.log("❌ No documents downloaded.");
     return;
   }
 
-  // Email the PDFs
   const transporter = nodemailer.createTransport({
     host: process.env.IMAP_HOST,
     port: 465,
@@ -124,7 +62,7 @@ async function downloadAndSendDocs(orderNumber, docId, customerEmail) {
     })),
   });
 
-  console.log("📧 Documents sent to", customerEmail);
+  console.log("✅ Documents sent to", customerEmail);
 }
 
 module.exports = { downloadAndSendDocs };
