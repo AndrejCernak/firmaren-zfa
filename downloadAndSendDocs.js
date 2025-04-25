@@ -17,8 +17,10 @@ async function downloadAndSendDocs(orderNumber, docId, customerEmail) {
   const downloadedPaths = [];
 
   for (const file of fileSuffixes) {
-    const url = `https://www.firmaren.sk/order/download/${docId}?f=bfg-company-services_${file}`;
-    const filePath = path.join(saveDir, file);
+    const filename = `bfg-company-services_${file}`;
+    const url = `https://www.firmaren.sk/order/download/${docId}?f=${filename}`;
+    const filePath = path.join(saveDir, filename);
+
     try {
       const res = await axios.get(url, { responseType: "stream" });
       const writer = fs.createWriteStream(filePath);
