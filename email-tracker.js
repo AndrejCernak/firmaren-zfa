@@ -84,40 +84,40 @@ async function checkInbox() {
 
       // ✅ VARIANT 1 – Handle document download
       if (variant === 1) {
-        // STEP 1: Match and extract the full stats-of-click link
+        // ✅ Variant 1: zaslanie dokumentov
+        
         const fullLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/stats-of-click\?[^ \n]+/);
         if (!fullLinkMatch) {
           console.log("❌ Stats-of-click link not found.");
           continue;
         }
-
-        // STEP 2: Extract the url= part
+      
         const urlParamMatch = fullLinkMatch[0].match(/url=([^&\s]+)/);
         if (!urlParamMatch) {
           console.log("❌ Could not extract encoded url= from stats-of-click.");
           continue;
         }
-
-        // STEP 3: Decode it
+      
         const decodedUrl = decodeURIComponent(urlParamMatch[1]);
-
-        // STEP 4: Extract docId from decoded ?o=
+      
         const docIdMatch = decodedUrl.match(/[?&]o=([a-zA-Z0-9]+)/);
         if (!docIdMatch) {
           console.log("❌ Document ID not found in decoded URL.");
           continue;
         }
-
+      
         const docId = docIdMatch[1];
         console.log("📥 Found docId:", docId);
-
-        await downloadAndSendDocs(orderNumber, docId, recipientEmail);
-        continue;
+      
+        // 🛠 Call the download and send function, pass docId and recipientEmail
+        await downloadAndSendDocs(docId, recipientEmail);
+      
+        continue; // VERY IMPORTANT to stop here after sending
       }
-
-      // ✅ VARIANTS 2–5 – Simple email reply
+      
+      // ✅ Other variants (2-5)
       const emailText = responses[variant];
-
+      
       const transporter = nodemailer.createTransport({
         host: process.env.IMAP_HOST,
         port: 465,
@@ -128,16 +128,16 @@ async function checkInbox() {
         },
         tls: { rejectUnauthorized: false },
       });
-
+      
       await transporter.sendMail({
         from: `"Firmaren Bot" <${process.env.EMAIL_ADDRESS}>`,
         to: recipientEmail,
         subject: `Info k objednávke č. ${orderNumber}`,
         text: emailText,
       });
-
-      console.log("✅ Email sent for variant", variant, "to", recipientEmail);
-    }
+      
+      console.log(`✅ Info email sent for variant ${variant} to ${recipientEmail}`);
+    }      
 
     connection.end();
   } catch (err) {
