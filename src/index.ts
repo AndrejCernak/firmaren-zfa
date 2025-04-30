@@ -10,7 +10,10 @@ import path from 'path'; // <- pridáme path modul
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'https://firmarenhosting.vercel.app',
+  methods: ['POST'],
+}));
 app.use(bodyParser.json());
 
 startEmailTracker();
