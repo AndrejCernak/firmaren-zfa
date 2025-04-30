@@ -4,16 +4,27 @@ import PDFDocument from 'pdfkit';
 import bodyParser from 'body-parser';
 import { startEmailTracker } from './email-tracker';
 import dotenv from 'dotenv';
-
-import path from 'path'; // <- pridáme path modul
+import path from 'path';
 
 dotenv.config();
 
 const app = express();
+
+// ✅ CORS CONFIGURATION – allow only your frontend domain
+const allowedOrigin = 'https://firmarenhosting.vercel.app';
+
 app.use(cors({
-  origin: 'https://firmarenhosting.vercel.app',
-  methods: ['POST'],
+  origin: function (origin, callback) {
+    if (!origin || origin === allowedOrigin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
 }));
+
 app.use(bodyParser.json());
 
 startEmailTracker();
@@ -46,16 +57,14 @@ app.post('/generate-zfa', (req: Request, res: Response) => {
   res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
   res.setHeader('Content-Type', 'application/pdf');
 
-  // 🔥 Nastavíme správnu cestu na font
+  // Font path
   const fontPath = path.join(__dirname, 'fonts', 'OpenSans-Regular.ttf');
-  doc.font(fontPath); // Používame OpenSans
+  doc.font(fontPath);
 
-  // Titulok
   doc.fontSize(20).text(cleanText('Zálohová faktúra'), { align: 'center' }).moveDown(1);
 
-  // Info o zákazníkovi
   doc.font('Helvetica-Bold').fontSize(14).text(cleanText('Zákazník:'), { underline: true }).moveDown(0.5);
-  doc.font(fontPath).fontSize(12); // Prepni späť na OpenSans po nadpise
+  doc.font(fontPath).fontSize(12);
 
   if (isCompany) {
     doc.text(`${cleanText('Firma')}: ${cleanText(companyName)}`);
@@ -67,23 +76,16 @@ app.post('/generate-zfa', (req: Request, res: Response) => {
   }
 
   doc.moveDown(0.5);
-
   doc.text(`Email: ${cleanText(email)}`);
   doc.text(`Adresa: ${cleanText(street)} ${cleanText(streetNumber)}, ${cleanText(city)}, ${cleanText(zipCode)}, ${cleanText(country)}`);
 
   doc.moveDown(1);
-
-  // Cena
   doc.font('Helvetica-Bold').text(cleanText('Suma na úhradu:'), { underline: true }).font(fontPath).text(`${cleanText(price)} EUR`);
 
   doc.moveDown(2);
-
-  // Dátum
   doc.fontSize(10).text(`${cleanText('Dátum vystavenia')}: ${new Date().toLocaleDateString('sk-SK')}`, { align: 'right' });
 
   doc.moveDown(3);
-
-  // Záver
   doc.fontSize(12).text(cleanText('Ďakujeme za objednávku!'), { align: 'center' });
 
   doc.end();
