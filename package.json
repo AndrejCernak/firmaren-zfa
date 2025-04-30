@@ -1,12 +1,12 @@
 {
   "name": "firmaren-zfa",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000f\u0000i\u0000r\u0000m\u0000a\u0000r\u0000e\u0000n\u0000-\u0000z\u0000f\u0000a\u0000\r\u0000 \u0000",
+  "description": "Firmaren ZFA service",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node src/index.ts",
-    "build": "npx tsc",
+    "build": "node ./node_modules/typescript/lib/tsc.js",
     "start": "node dist/index.js"
   },
   "keywords": [],
