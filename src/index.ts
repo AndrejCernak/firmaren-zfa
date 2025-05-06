@@ -10,20 +10,24 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS CONFIGURATION – allow only your frontend domain
-const allowedOrigin = 'https://firmarenhosting.vercel.app';
+const allowedOrigins = [
+  'https://firmarenhosting.vercel.app/',
+  'http://localhost:3000', // optional for local testing
+];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || origin === allowedOrigin) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.error('❌ Blocked by CORS:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
   methods: ['POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
 }));
+
 
 app.use(bodyParser.json());
 
