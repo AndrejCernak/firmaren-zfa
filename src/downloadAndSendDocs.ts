@@ -10,8 +10,10 @@ dotenv.config();
 export async function downloadAndSendDocs(docId: string, recipientEmail: string): Promise<void> {
   console.log(`🚀 Starting document download for docId: ${docId}`);
 
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
+    const page = await browser.newPage();
   await page.setJavaScriptEnabled(true);
 
   const url = `https://www.firmaren.sk/objednavka/dokumenty?o=${docId}&d=true`;
