@@ -10,23 +10,21 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [
-  'https://firmarenhosting.vercel.app/',
-  'http://localhost:3000', // optional for local testing
-];
+const allowedOrigins = ['https://firmarenhosting.vercel.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.error('❌ Blocked by CORS:', origin);
+      console.log(`❌ CORS blocked: ${origin}`);
       callback(new Error('Not allowed by CORS'));
     }
   },
   methods: ['POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type'],
 }));
+
 
 
 app.use(bodyParser.json());
