@@ -13,7 +13,9 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 async function downloadAndSendDocs(docId, recipientEmail) {
     console.log(`🚀 Starting document download for docId: ${docId}`);
-    const browser = await puppeteer_1.default.launch();
+    const browser = await puppeteer_1.default.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
     const page = await browser.newPage();
     await page.setJavaScriptEnabled(true);
     const url = `https://www.firmaren.sk/objednavka/dokumenty?o=${docId}&d=true`;
