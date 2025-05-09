@@ -10,23 +10,22 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = ['https://firmarenhosting-kxt07msp0-andrejcernaks-projects.vercel.app'];
+const allowedOrigins = ['https://firmarenhosting.vercel.app'];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log(`❌ CORS blocked: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
-}));
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin || allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin || '');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  }
+  next();
+});
 
-// ✅ Add this line to handle CORS preflight requests properly
-app.options('*', cors());
+app.options('*', (req, res) => {
+  res.sendStatus(204); // No content, just preflight approval
+});
+
 
 app.use(bodyParser.json());
 
