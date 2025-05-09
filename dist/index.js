@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const cors_1 = __importDefault(require("cors"));
 const pdfkit_1 = __importDefault(require("pdfkit"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const email_tracker_1 = require("./email-tracker");
@@ -11,22 +12,20 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const allowedOrigins = [
-    'https://firmarenhosting.vercel.app',
-    'https://firmarenhosting-kxt07msp0-andrejcernaks-projects.vercel.app'
-];
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (!origin || allowedOrigins.includes(origin)) {
-        res.setHeader('Access-Control-Allow-Origin', origin || '');
-        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    }
-    next();
-});
-app.options('*', (req, res) => {
-    res.sendStatus(204); // No content, just preflight approval
-});
+// ✅ CORS CONFIGURATION – allow only your frontend domain
+const allowedOrigin = 'https://firmarenhosting.vercel.app';
+app.use((0, cors_1.default)({
+    origin: function (origin, callback) {
+        if (!origin || origin === allowedOrigin) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+}));
 app.use(body_parser_1.default.json());
 (0, email_tracker_1.startEmailTracker)();
 // Funkcia na čistenie textu
