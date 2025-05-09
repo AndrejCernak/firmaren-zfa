@@ -37,7 +37,7 @@ app.post('/generate-zfa', (req, res) => {
     res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
     res.setHeader('Content-Type', 'application/pdf');
     // Font path
-    const fontPath = path_1.default.join(__dirname, 'fonts', 'OpenSans-Regular.ttf');
+    const fontPath = path_1.default.resolve(__dirname, '../src/fonts/OpenSans-Regular.ttf');
     doc.font(fontPath);
     doc.fontSize(20).text(cleanText('Zálohová faktúra'), { align: 'center' }).moveDown(1);
     doc.font('Helvetica-Bold').fontSize(14).text(cleanText('Zákazník:'), { underline: true }).moveDown(0.5);

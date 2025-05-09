@@ -10,7 +10,10 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = ['https://firmarenhosting.vercel.app'];
+const allowedOrigins = [
+  'https://firmarenhosting.vercel.app',
+  'https://firmarenhosting-kxt07msp0-andrejcernaks-projects.vercel.app'
+];
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
