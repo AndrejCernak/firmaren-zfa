@@ -10,25 +10,24 @@ dotenv.config();
 
 const app = express();
 
+// ✅ Allowed CORS origins
 const allowedOrigins = [
   'https://firmarenhosting.vercel.app',
   'https://firmarenhosting-kxt07msp0-andrejcernaks-projects.vercel.app'
 ];
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin || '');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  }
-  next();
-});
-
-app.options('*', (req, res) => {
-  res.sendStatus(204); // No content, just preflight approval
-});
-
+// ✅ Safe CORS middleware using `cors` package
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+}));
 
 app.use(bodyParser.json());
 
