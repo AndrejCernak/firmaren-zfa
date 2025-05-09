@@ -10,7 +10,7 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = ['https://firmarenhosting-kxt07msp0-andrejcernaks-projects.vercel.app/'];
+const allowedOrigins = ['https://firmarenhosting-kxt07msp0-andrejcernaks-projects.vercel.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -25,7 +25,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type'],
 }));
 
-
+// ✅ Add this line to handle CORS preflight requests properly
+app.options('*', cors());
 
 app.use(bodyParser.json());
 
