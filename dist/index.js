@@ -13,8 +13,10 @@ const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 // ✅ CORS CONFIGURATION – allow only your frontend domain
-const allowedOrigin = 'https://firmarenhosting.vercel.app';
-app.use((0, cors_1.default)({
+const allowedOrigins = [
+    'https://firmarenhosting.vercel.app',
+    'https://firmarenhosting-kxt07msp0-andrejcernaks-projects.vercel.app'
+  ];app.use((0, cors_1.default)({
     origin: function (origin, callback) {
         if (!origin || origin === allowedOrigin) {
             callback(null, true);
