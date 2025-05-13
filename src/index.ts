@@ -29,6 +29,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type'],
 }));
 
+// ✅ Nastavenie parsera pre JSON
 app.use(bodyParser.json());
 
 startEmailTracker();
