@@ -64,16 +64,16 @@ async function checkInbox() {
             }
             const variant = detected.variant;
             console.log("🔍 Matched variant:", variant);
-            const [rows] = await db_1.default.query("SELECT email FROM `Order` WHERE orderNumber = ?", [orderNumber]);
+            const [rows] = await db_1.default.query("SELECT id, email FROM `Order` WHERE orderNumber = ?", [orderNumber]);
             if (rows.length === 0) {
                 console.log("❌ No customer found for", orderNumber);
                 continue;
             }
+            const orderId = rows[0].id;
             const recipientEmail = rows[0].email;
-            // ✅ VARIANT 1 – Handle document download
+            // ✅ VARIANT 1 – Document download
             if (variant === 1) {
                 let docId = null;
-                // First try: stats-of-click link → extract & decode URL, then get docId
                 const statsLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/stats-of-click\?[^ \n]+/);
                 if (statsLinkMatch) {
                     const urlParamMatch = statsLinkMatch[0].match(/url=([^&\s]+)/);
@@ -85,7 +85,6 @@ async function checkInbox() {
                         }
                     }
                 }
-                // Second try: direct link like /objednavka/platba or /objednavka/dokumenty
                 if (!docId) {
                     const directLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/[^\s"]*o=([a-zA-Z0-9]+)/);
                     if (directLinkMatch) {
@@ -100,12 +99,14 @@ async function checkInbox() {
                 await (0, downloadAndSendDocs_1.downloadAndSendDocs)(docId, recipientEmail);
                 continue;
             }
-            // ✅ Other variants (2–5) – Send simple info email
-            // ✅ Other variants (2–5) – Send simple info email
+            // ✅ Other variants (2–5)
             const emailText = responses[variant];
-            // ⬅️ If it's the "firma zaregistrovaná" variant, update order status
+            // Update customer-facing status (regardless of variant)
+            await db_1.default.query("UPDATE `Order` SET customer_status_variant = ? WHERE id = ?", [variant, orderId]);
+            console.log(`📝 Updated customer_status_variant to ${variant} for order ${orderNumber}`);
+            // Also update admin status for variant 5 (completed)
             if (variant === 5) {
-                await db_1.default.query("UPDATE `Order` SET status = 'Založená' WHERE orderNumber = ?", [orderNumber]);
+                await db_1.default.query("UPDATE `Order` SET status = 'Založená' WHERE id = ?", [orderId]);
                 console.log(`📌 Order ${orderNumber} marked as 'Založená'`);
             }
             const transporter = nodemailer_1.default.createTransport({
