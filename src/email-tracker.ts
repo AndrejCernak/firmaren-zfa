@@ -76,7 +76,7 @@ async function checkInbox(): Promise<void> {
       console.log("🔍 Matched variant:", variant);
 
       const [rows]: any = await pool.query(
-        "SELECT email FROM `Order` WHERE orderNumber = ?",
+        "SELECT id, email FROM `Order` WHERE orderNumber = ?",
         [orderNumber]
       );
 
@@ -85,77 +85,80 @@ async function checkInbox(): Promise<void> {
         continue;
       }
 
+      const orderId: number = rows[0].id;
       const recipientEmail: string = rows[0].email;
 
-      // ✅ VARIANT 1 – Handle document download
-if (variant === 1) {
-  let docId: string | null = null;
+      // ✅ VARIANT 1 – Document download
+      if (variant === 1) {
+        let docId: string | null = null;
 
-  // First try: stats-of-click link → extract & decode URL, then get docId
-  const statsLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/stats-of-click\?[^ \n]+/);
-  if (statsLinkMatch) {
-    const urlParamMatch = statsLinkMatch[0].match(/url=([^&\s]+)/);
-    if (urlParamMatch) {
-      const decodedUrl = decodeURIComponent(urlParamMatch[1]);
-      const docIdMatch = decodedUrl.match(/[?&]o=([a-zA-Z0-9]+)/);
-      if (docIdMatch) {
-        docId = docIdMatch[1];
+        const statsLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/stats-of-click\?[^ \n]+/);
+        if (statsLinkMatch) {
+          const urlParamMatch = statsLinkMatch[0].match(/url=([^&\s]+)/);
+          if (urlParamMatch) {
+            const decodedUrl = decodeURIComponent(urlParamMatch[1]);
+            const docIdMatch = decodedUrl.match(/[?&]o=([a-zA-Z0-9]+)/);
+            if (docIdMatch) {
+              docId = docIdMatch[1];
+            }
+          }
+        }
+
+        if (!docId) {
+          const directLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/[^\s"]*o=([a-zA-Z0-9]+)/);
+          if (directLinkMatch) {
+            docId = directLinkMatch[1];
+          }
+        }
+
+        if (!docId) {
+          console.log("❌ No valid document link found.");
+          continue;
+        }
+
+        console.log("📥 Found docId:", docId);
+        await downloadAndSendDocs(docId, recipientEmail);
+        continue;
       }
-    }
-  }
 
-  // Second try: direct link like /objednavka/platba or /objednavka/dokumenty
-  if (!docId) {
-    const directLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/[^\s"]*o=([a-zA-Z0-9]+)/);
-    if (directLinkMatch) {
-      docId = directLinkMatch[1];
-    }
-  }
+      // ✅ Other variants (2–5)
+      const emailText = responses[variant];
 
-  if (!docId) {
-    console.log("❌ No valid document link found.");
-    continue;
-  }
+      // Update customer-facing status (regardless of variant)
+      await pool.query(
+        "UPDATE `Order` SET customer_status_variant = ? WHERE id = ?",
+        [variant, orderId]
+      );
+      console.log(`📝 Updated customer_status_variant to ${variant} for order ${orderNumber}`);
 
-  console.log("📥 Found docId:", docId);
-  await downloadAndSendDocs(docId, recipientEmail);
-  continue;
-}
+      // Also update admin status for variant 5 (completed)
+      if (variant === 5) {
+        await pool.query(
+          "UPDATE `Order` SET status = 'Založená' WHERE id = ?",
+          [orderId]
+        );
+        console.log(`📌 Order ${orderNumber} marked as 'Založená'`);
+      }
 
+      const transporter = nodemailer.createTransport({
+        host: process.env.IMAP_HOST!,
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.EMAIL_ADDRESS!,
+          pass: process.env.EMAIL_PASSWORD!,
+        },
+        tls: { rejectUnauthorized: false },
+      });
 
-      // ✅ Other variants (2–5) – Send simple info email
-      // ✅ Other variants (2–5) – Send simple info email
-const emailText = responses[variant];
+      await transporter.sendMail({
+        from: `"Firmaren Bot" <${process.env.EMAIL_ADDRESS}>`,
+        to: recipientEmail,
+        subject: `Info k objednávke č. ${orderNumber}`,
+        text: emailText,
+      });
 
-// ⬅️ If it's the "firma zaregistrovaná" variant, update order status
-if (variant === 5) {
-  await pool.query(
-    "UPDATE `Order` SET status = 'Založená' WHERE orderNumber = ?",
-    [orderNumber]
-  );
-  console.log(`📌 Order ${orderNumber} marked as 'Založená'`);
-}
-
-const transporter = nodemailer.createTransport({
-  host: process.env.IMAP_HOST!,
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_ADDRESS!,
-    pass: process.env.EMAIL_PASSWORD!,
-  },
-  tls: { rejectUnauthorized: false },
-});
-
-await transporter.sendMail({
-  from: `"Firmaren Bot" <${process.env.EMAIL_ADDRESS}>`,
-  to: recipientEmail,
-  subject: `Info k objednávke č. ${orderNumber}`,
-  text: emailText,
-});
-
-console.log(`✅ Info email sent for variant ${variant} to ${recipientEmail}`);
-
+      console.log(`✅ Info email sent for variant ${variant} to ${recipientEmail}`);
     }
 
     connection.end();
@@ -168,4 +171,3 @@ export function startEmailTracker(): void {
   console.log("📬 Email tracker running...");
   setInterval(checkInbox, 30 * 1000);
 }
-
