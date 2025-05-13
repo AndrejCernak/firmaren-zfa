@@ -88,33 +88,40 @@ async function checkInbox(): Promise<void> {
       const recipientEmail: string = rows[0].email;
 
       // ✅ VARIANT 1 – Handle document download
-      if (variant === 1) {
-        const fullLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/stats-of-click\?[^ \n]+/);
-        if (!fullLinkMatch) {
-          console.log("❌ Stats-of-click link not found.");
-          continue;
-        }
+if (variant === 1) {
+  let docId: string | null = null;
 
-        const urlParamMatch = fullLinkMatch[0].match(/url=([^&\s]+)/);
-        if (!urlParamMatch) {
-          console.log("❌ Could not extract encoded url= from stats-of-click.");
-          continue;
-        }
-
-        const decodedUrl = decodeURIComponent(urlParamMatch[1]);
-        const docIdMatch = decodedUrl.match(/[?&]o=([a-zA-Z0-9]+)/);
-        if (!docIdMatch) {
-          console.log("❌ Document ID not found in decoded URL.");
-          continue;
-        }
-
-        const docId = docIdMatch[1];
-        console.log("📥 Found docId:", docId);
-
-        await downloadAndSendDocs(docId, recipientEmail);
-
-        continue; // IMPORTANT to prevent falling down to simple email sending
+  // First try: stats-of-click link → extract & decode URL, then get docId
+  const statsLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/stats-of-click\?[^ \n]+/);
+  if (statsLinkMatch) {
+    const urlParamMatch = statsLinkMatch[0].match(/url=([^&\s]+)/);
+    if (urlParamMatch) {
+      const decodedUrl = decodeURIComponent(urlParamMatch[1]);
+      const docIdMatch = decodedUrl.match(/[?&]o=([a-zA-Z0-9]+)/);
+      if (docIdMatch) {
+        docId = docIdMatch[1];
       }
+    }
+  }
+
+  // Second try: direct link like /objednavka/platba or /objednavka/dokumenty
+  if (!docId) {
+    const directLinkMatch = fullText.match(/https:\/\/www\.firmaren\.sk\/[^\s"]*o=([a-zA-Z0-9]+)/);
+    if (directLinkMatch) {
+      docId = directLinkMatch[1];
+    }
+  }
+
+  if (!docId) {
+    console.log("❌ No valid document link found.");
+    continue;
+  }
+
+  console.log("📥 Found docId:", docId);
+  await downloadAndSendDocs(docId, recipientEmail);
+  continue;
+}
+
 
       // ✅ Other variants (2–5) – Send simple info email
       const emailText = responses[variant];
