@@ -13,7 +13,7 @@ const app = express();
 // ✅ Allowed CORS origins
 const allowedOrigins = [
   'https://firmarenhosting.vercel.app',
-  'https://firmarenhosting-hz2kyi0n6-andrejcernaks-projects.vercel.app'
+  'https://firmarenhosting-k609iif0e-andrejcernaks-projects.vercel.app'
 ];
 
 // ✅ Safe CORS middleware using `cors` package
