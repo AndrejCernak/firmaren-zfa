@@ -13,7 +13,7 @@ const app = express();
 // ✅ Allowed CORS origins
 const allowedOrigins = [
   'https://firmarenhosting.vercel.app',
-  'https://firmarenhosting-6hwlaz7qj-andrejcernaks-projects.vercel.app',
+  'https://firmarenhosting-frj2nfzqq-andrejcernaks-projects.vercel.app',
   'http://localhost:3000' // ✅ lokálny vývoj
 ];
 
