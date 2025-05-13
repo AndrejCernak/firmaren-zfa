@@ -15,9 +15,9 @@ const app = (0, express_1.default)();
 // ✅ Allowed CORS origins
 const allowedOrigins = [
     'https://firmarenhosting.vercel.app',
-    'https://firmarenhosting-6hwlaz7qj-andrejcernaks-projects.vercel.app'
+    'https://firmarenhosting-6hwlaz7qj-andrejcernaks-projects.vercel.app',
+    'http://localhost:3000' // ✅ lokálny vývoj
 ];
-// ✅ Safe CORS middleware using `cors` package
 app.use((0, cors_1.default)({
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
@@ -67,6 +67,48 @@ app.post('/generate-zfa', (req, res) => {
     doc.fontSize(10).text(`${cleanText('Dátum vystavenia')}: ${new Date().toLocaleDateString('sk-SK')}`, { align: 'right' });
     doc.moveDown(3);
     doc.fontSize(12).text(cleanText('Ďakujeme za objednávku!'), { align: 'center' });
+    doc.end();
+    doc.pipe(res);
+});
+app.post('/generate-zuctovanie', (req, res) => {
+    const { email, price, isCompany, companyName, ico, dic, ic_dph, firstName, lastName, street, city, zipCode, country, zfaNumber, zfaDate, invoiceNumber, } = req.body;
+    const doc = new pdfkit_1.default({ margin: 50 });
+    const filename = `Faktura-${invoiceNumber}.pdf`;
+    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+    res.setHeader('Content-Type', 'application/pdf');
+    const fontPath = path_1.default.join(__dirname, 'fonts', 'OpenSans-Regular.ttf');
+    doc.font(fontPath);
+    const cleanText = (text) => text?.toString().normalize('NFC').replace(/\r\n/g, '\n').trim() ?? '';
+    doc.fontSize(20).text('Faktúra – daňový doklad', { align: 'center' }).moveDown(1);
+    doc.font('Helvetica-Bold').fontSize(14).text('Zákazník:', { underline: true }).moveDown(0.5);
+    doc.font(fontPath).fontSize(12);
+    if (isCompany) {
+        doc.text(`Firma: ${cleanText(companyName)}`);
+        if (ico)
+            doc.text(`IČO: ${cleanText(ico)}`);
+        if (dic)
+            doc.text(`DIČ: ${cleanText(dic)}`);
+        if (ic_dph)
+            doc.text(`IČ DPH: ${cleanText(ic_dph)}`);
+    }
+    else {
+        doc.text(`Meno: ${cleanText(firstName)} ${cleanText(lastName)}`);
+    }
+    doc.moveDown(0.5);
+    doc.text(`Email: ${cleanText(email)}`);
+    doc.text(`Adresa: ${cleanText(street)}, ${cleanText(zipCode)} ${cleanText(city)}, ${cleanText(country)}`);
+    doc.moveDown(1);
+    doc.font('Helvetica-Bold').text('Fakturované položky:', { underline: true }).moveDown(0.5);
+    doc.font(fontPath);
+    doc.text(`Založenie spoločnosti ................................................... ${cleanText(price)} €`);
+    const parsedZfaDate = new Date(zfaDate);
+    doc.text(`Záloha zaplatená na základe faktúry č. ${zfaNumber} dňa ${parsedZfaDate.toLocaleDateString('sk-SK')} .......... -${cleanText(price)} €`);
+    doc.moveDown(1);
+    doc.font('Helvetica-Bold').text('Spolu na úhradu: 0,00 €', { align: 'right' });
+    doc.moveDown(2);
+    doc.fontSize(10).text(`Dátum vystavenia: ${new Date().toLocaleDateString('sk-SK')}`, { align: 'right' });
+    doc.moveDown(3);
+    doc.font(fontPath).fontSize(12).text('Ďakujeme za využitie našich služieb.', { align: 'center' });
     doc.end();
     doc.pipe(res);
 });
