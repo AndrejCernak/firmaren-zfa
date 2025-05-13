@@ -124,27 +124,38 @@ if (variant === 1) {
 
 
       // ✅ Other variants (2–5) – Send simple info email
-      const emailText = responses[variant];
+      // ✅ Other variants (2–5) – Send simple info email
+const emailText = responses[variant];
 
-      const transporter = nodemailer.createTransport({
-        host: process.env.IMAP_HOST!,
-        port: 465,
-        secure: true,
-        auth: {
-          user: process.env.EMAIL_ADDRESS!,
-          pass: process.env.EMAIL_PASSWORD!,
-        },
-        tls: { rejectUnauthorized: false },
-      });
+// ⬅️ If it's the "firma zaregistrovaná" variant, update order status
+if (variant === 5) {
+  await pool.query(
+    "UPDATE `Order` SET status = 'Založená' WHERE orderNumber = ?",
+    [orderNumber]
+  );
+  console.log(`📌 Order ${orderNumber} marked as 'Založená'`);
+}
 
-      await transporter.sendMail({
-        from: `"Firmaren Bot" <${process.env.EMAIL_ADDRESS}>`,
-        to: recipientEmail,
-        subject: `Info k objednávke č. ${orderNumber}`,
-        text: emailText,
-      });
+const transporter = nodemailer.createTransport({
+  host: process.env.IMAP_HOST!,
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.EMAIL_ADDRESS!,
+    pass: process.env.EMAIL_PASSWORD!,
+  },
+  tls: { rejectUnauthorized: false },
+});
 
-      console.log(`✅ Info email sent for variant ${variant} to ${recipientEmail}`);
+await transporter.sendMail({
+  from: `"Firmaren Bot" <${process.env.EMAIL_ADDRESS}>`,
+  to: recipientEmail,
+  subject: `Info k objednávke č. ${orderNumber}`,
+  text: emailText,
+});
+
+console.log(`✅ Info email sent for variant ${variant} to ${recipientEmail}`);
+
     }
 
     connection.end();

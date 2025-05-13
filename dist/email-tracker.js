@@ -101,7 +101,13 @@ async function checkInbox() {
                 continue;
             }
             // ✅ Other variants (2–5) – Send simple info email
+            // ✅ Other variants (2–5) – Send simple info email
             const emailText = responses[variant];
+            // ⬅️ If it's the "firma zaregistrovaná" variant, update order status
+            if (variant === 5) {
+                await db_1.default.query("UPDATE `Order` SET status = 'Založená' WHERE orderNumber = ?", [orderNumber]);
+                console.log(`📌 Order ${orderNumber} marked as 'Založená'`);
+            }
             const transporter = nodemailer_1.default.createTransport({
                 host: process.env.IMAP_HOST,
                 port: 465,
