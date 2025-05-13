@@ -15,7 +15,7 @@ const app = (0, express_1.default)();
 // ✅ Allowed CORS origins
 const allowedOrigins = [
     'https://firmarenhosting.vercel.app',
-    'https://firmarenhosting-frj2nfzqq-andrejcernaks-projects.vercel.app',
+    'https://firmarenhosting-611mgrw50-andrejcernaks-projects.vercel.app',
     'http://localhost:3000' // ✅ lokálny vývoj
 ];
 app.use((0, cors_1.default)({
@@ -30,6 +30,7 @@ app.use((0, cors_1.default)({
     methods: ['POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type'],
 }));
+// ✅ Nastavenie parsera pre JSON
 app.use(body_parser_1.default.json());
 (0, email_tracker_1.startEmailTracker)();
 // Funkcia na čistenie textu
