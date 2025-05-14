@@ -23,11 +23,11 @@ const imapConfig = {
     },
 };
 const keywordVariants = [
-    { keyword: "Zaslanie dokumentov", variant: 1 },
-    { keyword: "Prijatie objednávky", variant: 2 },
-    { keyword: "Podanie na živnostenský register", variant: 3 },
-    { keyword: "Podanie na obchodný register", variant: 4 },
-    { keyword: "Firma zaregistrovaná", variant: 5 },
+    { keyword: "zaslanie dokumentov", variant: 1 },
+    { keyword: "prijatie objednávky", variant: 2 },
+    { keyword: "podanie na živnostenský register", variant: 3 },
+    { keyword: "podanie na obchodný register", variant: 4 },
+    { keyword: "firma zaregistrovaná", variant: 5 },
 ];
 const responses = {
     2: "Vašu objednávku sme prijali a pripravujeme dokumenty.",
