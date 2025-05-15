@@ -13,7 +13,7 @@ const app = express();
 
 const allowedOrigins = [
   'https://firmarenhosting.vercel.app',
-  'https://firmarenhosting-r2tlgs8qe-andrejcernaks-projects.vercel.app',
+  'https://firmarenhosting-msltt4rfs-andrejcernaks-projects.vercel.app',
   'http://localhost:3000',
 ];
 
@@ -93,7 +93,7 @@ app.post('/generate-zfa', (req: Request, res: Response) => {
 
   doc.moveDown(0.5);
   doc.text(`Email: ${cleanText(email)}`);
-  doc.text(`Adresa: ${cleanText(street)} ${cleanText(streetNumber)}, ${cleanText(city)}, ${cleanText(zipCode)}, ${cleanText(country)}`);
+  doc.text(`Adresa: ${cleanText(street)}, ${cleanText(city)}, ${cleanText(zipCode)}, ${cleanText(country)}`);
 
   doc.moveDown(1);
   doc.font('Helvetica-Bold').text('Suma na úhradu:', { underline: true }).font(fontPath).text(`${cleanText(price)} EUR`);
