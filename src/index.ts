@@ -13,7 +13,7 @@ const app = express();
 
 const allowedOrigins = [
   'https://firmarenhosting.vercel.app',
-  'https://firmarenhosting-msltt4rfs-andrejcernaks-projects.vercel.app',
+  'https://firmarenhosting-bqc15vzz8-andrejcernaks-projects.vercel.app',
   'http://localhost:3000',
 ];
 
