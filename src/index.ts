@@ -50,6 +50,12 @@ async function sendPdfEmail(to: string, subject: string, buffer: Buffer, filenam
     tls: { rejectUnauthorized: false },
   });
 
+
+console.log("🔵 Sending email to:", to);
+console.log("🔵 Using subject:", subject);
+console.log("🔵 Attachment size (bytes):", buffer.length);
+
+
   await transporter.sendMail({
     from: `"Firmaren" <${process.env.EMAIL_ADDRESS}>`,
     to,
@@ -71,9 +77,10 @@ app.post('/generate-zfa', (req: Request, res: Response) => {
   const {
     email, price, isCompany, companyName, ico, dic, ic_dph,
     firstName, lastName, street, streetNumber, city, zipCode, country,
+    zfaNumber, zfaDate, // ⬅ new from frontend
   } = req.body;
 
-  const filename = `ZFA-faktura.pdf`;
+  const filename = `ZFA-${zfaNumber}.pdf`;
   const doc = new PDFDocument({ margin: 50 });
   const fontPath = path.join(__dirname, 'fonts', 'OpenSans-Regular.ttf');
   doc.font(fontPath);
@@ -94,14 +101,15 @@ app.post('/generate-zfa', (req: Request, res: Response) => {
   doc.moveDown(0.5);
   doc.text(`Email: ${cleanText(email)}`);
   doc.text(`Adresa: ${cleanText(street)}, ${cleanText(city)}, ${cleanText(zipCode)}, ${cleanText(country)}`);
+  doc.text(`Číslo zálohovej faktúry: ${cleanText(zfaNumber)}`);
 
   doc.moveDown(1);
   doc.font('Helvetica-Bold').text('Suma na úhradu:', { underline: true }).font(fontPath).text(`${cleanText(price)} EUR`);
 
-  doc.moveDown(2);
-  doc.fontSize(10).text(`Dátum vystavenia: ${new Date().toLocaleDateString('sk-SK')}`, { align: 'right' });
+  doc.moveDown(1);
+  doc.fontSize(10).text(`Dátum vystavenia: ${new Date(zfaDate).toLocaleDateString('sk-SK')}`, { align: 'right' });
 
-  doc.moveDown(3);
+  doc.moveDown(2);
   doc.fontSize(12).text('Ďakujeme za objednávku!', { align: 'center' });
 
   const chunks: Buffer[] = [];
@@ -116,6 +124,7 @@ app.post('/generate-zfa', (req: Request, res: Response) => {
 
   doc.end();
 });
+
 
 // 🔹 Generovanie zúčtovacej faktúry
 app.post('/generate-zuctovanie', (req: Request, res: Response) => {
