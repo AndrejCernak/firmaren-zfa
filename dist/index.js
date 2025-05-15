@@ -15,7 +15,7 @@ dotenv_1.default.config();
 const app = (0, express_1.default)();
 const allowedOrigins = [
     'https://firmarenhosting.vercel.app',
-    'https://firmarenhosting-5cr822amx-andrejcernaks-projects.vercel.app',
+    'https://firmarenhosting-5hbj4cefc-andrejcernaks-projects.vercel.app',
     'http://localhost:3000',
 ];
 app.use((0, cors_1.default)({
