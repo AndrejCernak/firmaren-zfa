@@ -13,10 +13,14 @@ const path_1 = __importDefault(require("path"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const allowedOrigin = process.env.ALLOWED_ORIGIN;
+const allowedOrigins = [
+    'https://firmarenhosting.vercel.app',
+    'https://firmarenhosting-ndarl8x2e-andrejcernaks-projects.vercel.app',
+    'http://localhost:3000',
+];
 app.use((0, cors_1.default)({
     origin: function (origin, callback) {
-        if (!origin || origin === allowedOrigin) {
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         }
         else {

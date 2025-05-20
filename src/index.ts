@@ -11,12 +11,15 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigin = process.env.ALLOWED_ORIGIN;
-
+const allowedOrigins = [
+  'https://firmarenhosting.vercel.app',
+  'https://firmarenhosting-ndarl8x2e-andrejcernaks-projects.vercel.app',
+  'http://localhost:3000',
+];
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || origin === allowedOrigin) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
