@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "Firmaren ZFA service",
   "main": "index.js",
-"scripts": {
-  "dev": "ts-node src/index.ts",
-  "build": "node --no-warnings ./node_modules/typescript/lib/tsc.js && cp -r src/fonts dist/fonts",
-  "start": "node dist/index.js"
-},
-
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "node --no-warnings ./node_modules/typescript/lib/tsc.js && cp -r src/fonts dist/fonts",
+    "start": "node dist/index.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -30,7 +29,7 @@
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.1",
+    "@types/express": "^5.0.2",
     "@types/imap-simple": "^4.2.9",
     "@types/mailparser": "^3.4.5",
     "@types/node": "^22.15.2",

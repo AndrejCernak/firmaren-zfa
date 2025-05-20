@@ -72,6 +72,8 @@ console.log("🔵 Attachment size (bytes):", buffer.length);
   console.log(`📧 Faktúra odoslaná na ${to}`);
 }
 
+
+
 // 🔹 Generovanie ZFA faktúry
 app.post('/generate-zfa', (req: Request, res: Response) => {
   const {
@@ -80,7 +82,7 @@ app.post('/generate-zfa', (req: Request, res: Response) => {
     zfaNumber, zfaDate, // ⬅ new from frontend
   } = req.body;
 
-  const filename = `ZFA-${zfaNumber}.pdf`;
+  const filename = `${zfaNumber}.pdf`;
   const doc = new PDFDocument({ margin: 50 });
   const fontPath = path.join(__dirname, 'fonts', 'OpenSans-Regular.ttf');
   doc.font(fontPath);
@@ -185,6 +187,43 @@ app.post('/generate-zuctovanie', (req: Request, res: Response) => {
 
   doc.end();
 });
+
+
+app.post('/send-registration-link', async (req: Request, res: Response) => {
+  const { email, link } = req.body;
+
+  if (!email || !link) {
+    res.status(400).json({ error: 'Missing email or link.' });
+    return;
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.IMAP_HOST!,
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_ADDRESS!,
+        pass: process.env.EMAIL_PASSWORD!,
+      },
+      tls: { rejectUnauthorized: false },
+    });
+
+    await transporter.sendMail({
+      from: `"Firmáreň" <${process.env.EMAIL_ADDRESS}>`,
+      to: email,
+      subject: 'Odkaz na registračný formulár',
+      text: `Dobrý deň,\n\nďakujeme za objednávku. Váš registračný formulár nájdete tu:\n\n${link}\n\nS pozdravom,\nTím Firmáreň`,
+    });
+
+    console.log(`📨 Registračný link odoslaný na ${email}`);
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('❌ Chyba pri odosielaní emailu:', err);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
+});
+
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 4000;
 app.listen(PORT, () => console.log(`✅ PDF & Mail service running at http://localhost:${PORT}`));
