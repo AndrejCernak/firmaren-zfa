@@ -127,68 +127,6 @@ app.post('/generate-zfa', (req: Request, res: Response) => {
   doc.end();
 });
 
-
-// 🔹 Generovanie zúčtovacej faktúry
-app.post('/generate-zuctovanie', (req: Request, res: Response) => {
-  const {
-    email, price, isCompany, companyName, ico, dic, ic_dph,
-    firstName, lastName, street, city, zipCode, country,
-    zfaNumber, zfaDate, invoiceNumber,
-  } = req.body;
-
-  const filename = `Faktura-${invoiceNumber}.pdf`;
-  const doc = new PDFDocument({ margin: 50 });
-  const fontPath = path.join(__dirname, 'fonts', 'OpenSans-Regular.ttf');
-  doc.font(fontPath);
-
-  doc.fontSize(20).text('Faktúra – daňový doklad', { align: 'center' }).moveDown(1);
-  doc.font('Helvetica-Bold').fontSize(14).text('Zákazník:', { underline: true }).moveDown(0.5);
-  doc.font(fontPath).fontSize(12);
-
-  if (isCompany) {
-    doc.text(`Firma: ${cleanText(companyName)}`);
-    if (ico) doc.text(`IČO: ${cleanText(ico)}`);
-    if (dic) doc.text(`DIČ: ${cleanText(dic)}`);
-    if (ic_dph) doc.text(`IČ DPH: ${cleanText(ic_dph)}`);
-  } else {
-    doc.text(`Meno: ${cleanText(firstName)} ${cleanText(lastName)}`);
-  }
-
-  doc.moveDown(0.5);
-  doc.text(`Email: ${cleanText(email)}`);
-  doc.text(`Adresa: ${cleanText(street)}, ${cleanText(zipCode)} ${cleanText(city)}, ${cleanText(country)}`);
-
-  doc.moveDown(1);
-  doc.font('Helvetica-Bold').text('Fakturované položky:', { underline: true }).moveDown(0.5);
-  doc.font(fontPath);
-  doc.text(`Založenie spoločnosti ................................................... ${cleanText(price)} €`);
-
-  const parsedZfaDate = new Date(zfaDate);
-  doc.text(`Záloha zaplatená na základe faktúry č. ${zfaNumber} dňa ${parsedZfaDate.toLocaleDateString('sk-SK')} .......... -${cleanText(price)} €`);
-
-  doc.moveDown(1);
-  doc.font('Helvetica-Bold').text('Spolu na úhradu: 0,00 €', { align: 'right' });
-
-  doc.moveDown(2);
-  doc.fontSize(10).text(`Dátum vystavenia: ${new Date().toLocaleDateString('sk-SK')}`, { align: 'right' });
-
-  doc.moveDown(3);
-  doc.font(fontPath).fontSize(12).text('Ďakujeme za využitie našich služieb.', { align: 'center' });
-
-  const chunks: Buffer[] = [];
-  doc.on('data', (chunk) => chunks.push(chunk));
-  doc.on('end', async () => {
-    const buffer = Buffer.concat(chunks);
-    await sendPdfEmail(email, 'Vaša zúčtovacia faktúra', buffer, filename);
-    res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
-    res.setHeader('Content-Type', 'application/pdf');
-    res.send(buffer);
-  });
-
-  doc.end();
-});
-
-
 app.post('/send-registration-link', async (req: Request, res: Response) => {
   const { email, link } = req.body;
 
