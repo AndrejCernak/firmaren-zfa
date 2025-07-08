@@ -4,10 +4,10 @@
   "description": "Firmaren ZFA service",
   "main": "dist/index.js",
   "scripts": {
-  "build": "npm run install-chrome && tsc && cp -r src/fonts dist/fonts && cp -r src/templates dist/templates",
-  "install-chrome": "npx puppeteer browsers install chrome",
-  "start": "node dist/index.js"
-},
+    "dev": "ts-node src/index.ts",
+    "build": "tsc && cp -r src/fonts dist/fonts && cp -r src/templates dist/templates",
+  "start": "NODE_ENV=production node dist/index.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
