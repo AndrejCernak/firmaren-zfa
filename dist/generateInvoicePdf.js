@@ -55,7 +55,10 @@ async function generateInvoicePdf(data) {
         styles: css,
         supplier,
     });
-    const browser = await puppeteer_1.default.launch({ headless: true });
+    const browser = await puppeteer_1.default.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = await browser.newPage();
     await page.setContent(htmlWithStyles, { waitUntil: 'networkidle0' });
     const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true });

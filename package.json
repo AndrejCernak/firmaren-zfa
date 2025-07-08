@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node src/index.ts",
-"build": "tsc && cp -r src/fonts dist/fonts && cp -r src/templates dist/templates",
-    "start": "node dist/index.js"
+    "build": "tsc && cp -r src/fonts dist/fonts && cp -r src/templates dist/templates",
+"start": "NODE_ENV=production node dist/index.js"
   },
   "keywords": [],
   "author": "",
