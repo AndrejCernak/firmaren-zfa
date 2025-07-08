@@ -104,7 +104,6 @@ async function checkInbox() {
             // Update customer-facing status (regardless of variant)
             await db_1.default.query("UPDATE `Order` SET customer_status_variant = ? WHERE id = ?", [variant, orderId]);
             console.log(`📝 Updated customer_status_variant to ${variant} for order ${orderNumber}`);
-            // Also update admin status for variant 5 (completed)
             if (variant === 5) {
                 await db_1.default.query("UPDATE `Order` SET status = 'Založená' WHERE id = ?", [orderId]);
                 console.log(`📌 Order ${orderNumber} marked as 'Založená'`);

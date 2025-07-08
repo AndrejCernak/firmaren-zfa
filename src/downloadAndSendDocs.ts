@@ -90,10 +90,10 @@ export async function downloadAndSendDocs(docId: string, recipientEmail: string)
     });
 
     await transporter.sendMail({
-      from: `"Firmaren Bot" <${process.env.EMAIL_ADDRESS}>`,
+      from: `"firma.tbg.sk Bot" <${process.env.EMAIL_ADDRESS}>`,
       to: recipientEmail,
       subject: `Vaše dokumenty k objednávke`,
-      text: `Dobrý deň,\n\nv prílohe nájdete dokumenty k Vašej objednávke.\n\nS pozdravom,\nFirmáreň`,
+      text: `Dobrý deň,\n\nv prílohe nájdete dokumenty k Vašej objednávke.\n\nS pozdravom,\nfirma.tbg.sk`,
       attachments: attachments,
     });
 

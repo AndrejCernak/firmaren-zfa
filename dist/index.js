@@ -5,12 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const pdfkit_1 = __importDefault(require("pdfkit"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const email_tracker_1 = require("./email-tracker");
 const dotenv_1 = __importDefault(require("dotenv"));
-const path_1 = __importDefault(require("path"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
+const generateInvoicePdf_1 = require("./generateInvoicePdf");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const allowedOrigins = [
@@ -50,7 +49,7 @@ async function sendPdfEmail(to, subject, buffer, filename) {
     console.log("🔵 Using subject:", subject);
     console.log("🔵 Attachment size (bytes):", buffer.length);
     await transporter.sendMail({
-        from: `"Firmaren" <${process.env.EMAIL_ADDRESS}>`,
+        from: `"Založenie firmy" <${process.env.EMAIL_ADDRESS}>`,
         to,
         subject,
         text: 'V prílohe nájdete svoju faktúru.',
@@ -63,49 +62,20 @@ async function sendPdfEmail(to, subject, buffer, filename) {
     });
     console.log(`📧 Faktúra odoslaná na ${to}`);
 }
-// 🔹 Generovanie ZFA faktúry
-app.post('/generate-zfa', (req, res) => {
-    const { email, price, isCompany, companyName, ico, dic, ic_dph, firstName, lastName, street, streetNumber, city, zipCode, country, zfaNumber, zfaDate, // ⬅ new from frontend
-     } = req.body;
-    const filename = `${zfaNumber}.pdf`;
-    const doc = new pdfkit_1.default({ margin: 50 });
-    const fontPath = path_1.default.join(__dirname, 'fonts', 'OpenSans-Regular.ttf');
-    doc.font(fontPath);
-    doc.fontSize(20).text('Zálohová faktúra', { align: 'center' }).moveDown(1);
-    doc.font('Helvetica-Bold').fontSize(14).text('Zákazník:', { underline: true }).moveDown(0.5);
-    doc.font(fontPath).fontSize(12);
-    if (isCompany) {
-        doc.text(`Firma: ${cleanText(companyName)}`);
-        if (ico)
-            doc.text(`IČO: ${cleanText(ico)}`);
-        if (dic)
-            doc.text(`DIČ: ${cleanText(dic)}`);
-        if (ic_dph)
-            doc.text(`IČ DPH: ${cleanText(ic_dph)}`);
-    }
-    else {
-        doc.text(`Meno: ${cleanText(firstName)} ${cleanText(lastName)}`);
-    }
-    doc.moveDown(0.5);
-    doc.text(`Email: ${cleanText(email)}`);
-    doc.text(`Adresa: ${cleanText(street)}, ${cleanText(city)}, ${cleanText(zipCode)}, ${cleanText(country)}`);
-    doc.text(`Číslo zálohovej faktúry: ${cleanText(zfaNumber)}`);
-    doc.moveDown(1);
-    doc.font('Helvetica-Bold').text('Suma na úhradu:', { underline: true }).font(fontPath).text(`${cleanText(price)} EUR`);
-    doc.moveDown(1);
-    doc.fontSize(10).text(`Dátum vystavenia: ${new Date(zfaDate).toLocaleDateString('sk-SK')}`, { align: 'right' });
-    doc.moveDown(2);
-    doc.fontSize(12).text('Ďakujeme za objednávku!', { align: 'center' });
-    const chunks = [];
-    doc.on('data', (chunk) => chunks.push(chunk));
-    doc.on('end', async () => {
-        const buffer = Buffer.concat(chunks);
-        await sendPdfEmail(email, 'Vaša zálohová faktúra', buffer, filename);
+app.post('/generate-zuctovanie', async (req, res) => {
+    const data = req.body;
+    const filename = `Faktura-${data.invoiceNumber || 'bez-cisla'}.pdf`;
+    try {
+        const pdfBuffer = Buffer.from(await (0, generateInvoicePdf_1.generateInvoicePdf)(data));
+        await sendPdfEmail(data.email, 'Vaša zúčtovacia faktúra', pdfBuffer, filename);
         res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
         res.setHeader('Content-Type', 'application/pdf');
-        res.send(buffer);
-    });
-    doc.end();
+        res.send(pdfBuffer);
+    }
+    catch (err) {
+        console.error('❌ Chyba pri generovaní faktúry:', err);
+        res.status(500).json({ error: 'Failed to generate invoice PDF' });
+    }
 });
 app.post('/send-registration-link', async (req, res) => {
     const { email, link } = req.body;
@@ -125,10 +95,10 @@ app.post('/send-registration-link', async (req, res) => {
             tls: { rejectUnauthorized: false },
         });
         await transporter.sendMail({
-            from: `"Firmáreň" <${process.env.EMAIL_ADDRESS}>`,
+            from: `"Založenie firmy" <${process.env.EMAIL_ADDRESS}>`,
             to: email,
             subject: 'Odkaz na registračný formulár',
-            text: `Dobrý deň,\n\nďakujeme za objednávku. Váš registračný formulár nájdete tu:\n\n${link}\n\nS pozdravom,\nTím Firmáreň`,
+            text: `Dobrý deň,\n\nďakujeme za objednávku. Váš registračný formulár nájdete tu:\n\n${link}\n\nS pozdravom,\nTím firma.tbg.sk`,
         });
         console.log(`📨 Registračný link odoslaný na ${email}`);
         res.status(200).json({ success: true });

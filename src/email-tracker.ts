@@ -131,7 +131,6 @@ async function checkInbox(): Promise<void> {
       );
       console.log(`📝 Updated customer_status_variant to ${variant} for order ${orderNumber}`);
 
-      // Also update admin status for variant 5 (completed)
       if (variant === 5) {
         await pool.query(
           "UPDATE `Order` SET status = 'Založená' WHERE id = ?",
