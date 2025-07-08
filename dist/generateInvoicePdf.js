@@ -35,8 +35,8 @@ handlebars_1.default.registerHelper('formatDate', function (date) {
     return isNaN(d.getTime()) ? '' : d.toLocaleDateString('sk-SK');
 });
 async function generateInvoicePdf(data) {
-    const htmlPath = path_1.default.join(__dirname, '..', 'templates', 'invoice.html');
-    const cssPath = path_1.default.join(__dirname, '..', 'templates', 'invoice.css');
+    const htmlPath = path_1.default.join(__dirname, 'templates', 'invoice.html');
+    const cssPath = path_1.default.join(__dirname, 'templates', 'invoice.css');
     const html = fs_1.default.readFileSync(htmlPath, 'utf-8');
     const css = fs_1.default.readFileSync(cssPath, 'utf-8');
     // dodavatel udaje

@@ -1,0 +1,64 @@
+
+
+body {
+    margin: 20px;
+}
+
+.row { 
+    display: flex;
+}
+
+.text-start {
+    text-align: left;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-end {
+    text-align: right;
+}
+
+.col {
+    display: flex;
+    flex-flow: column;
+}
+
+.mt-3 {
+    margin-top: 3rem;
+}
+
+.mt-4 {
+    margin-top: 4rem;
+}
+
+
+.row.space-between {
+    justify-content: space-between;
+}
+
+/* table, th, td {
+    border:1px solid black;
+} */
+
+table {
+    border-spacing: 0;
+}
+
+th {
+    border-bottom: 2px solid grey;
+}
+
+tr {
+    height: 28px;
+}
+
+td {
+    border-bottom: 1px solid grey;
+}
+
+  
+.customer {
+    text-align: right;
+}

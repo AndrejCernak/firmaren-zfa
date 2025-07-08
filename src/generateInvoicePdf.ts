@@ -34,8 +34,9 @@ handlebars.registerHelper('formatDate', function (date: string) {
 });
 
 export async function generateInvoicePdf(data: any): Promise<Uint8Array> {
-  const htmlPath = path.join(__dirname, '..', 'templates', 'invoice.html');
-  const cssPath = path.join(__dirname, '..', 'templates', 'invoice.css');
+  const htmlPath = path.join(__dirname, 'templates', 'invoice.html');
+const cssPath = path.join(__dirname, 'templates', 'invoice.css');
+
 
   const html = fs.readFileSync(htmlPath, 'utf-8');
   const css = fs.readFileSync(cssPath, 'utf-8');

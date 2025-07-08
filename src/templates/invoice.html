@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="sk">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Faktúra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      {{{styles}}}
+    </style>
+  </head>
+  <body>
+    <h2 class="text-center">Faktúra č. {{invoiceNumber}}</h2>
+
+    <div class="row space-between mt-4">
+      <div class="col">
+        <h4>Dodávateľ</h4>
+        <div><strong>{{supplier.name}}</strong></div>
+        <div>{{supplier.street}}</div>
+        <div>{{supplier.city}}</div>
+        <div>IČO: {{supplier.ico}}</div>
+        <div>DIČ: {{supplier.dic}}</div>
+        <div>IČ DPH: {{supplier.ic_dph}}</div>
+      </div>
+
+      <div class="col customer">
+        <h4>Odberateľ</h4>
+        {{#if isCompany}}
+          <div><strong>{{companyName}}</strong></div>
+          <div>IČO: {{ico}}</div>
+          <div>DIČ: {{dic}}</div>
+          <div>IČ DPH: {{ic_dph}}</div>
+        {{else}}
+          <div><strong>{{firstName}} {{lastName}}</strong></div>
+        {{/if}}
+        <div>{{street}}</div>
+        <div>{{zipCode}} {{city}}, {{country}}</div>
+        <div>Email: {{email}}</div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <h4>Položky</h4>
+      <table style="width: 100%">
+        <thead>
+          <tr>
+            <th class="text-start">Názov</th>
+            <th class="text-end">Cena bez DPH</th>
+            <th class="text-end">DPH 20%</th>
+            <th class="text-end">Cena s DPH</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Založenie spoločnosti</td>
+            <td class="text-end">{{price}} €</td>
+            <td class="text-end">{{calcVat price}} €</td>
+            <td class="text-end">{{calcTotal price}} €</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row mt-4 space-between">
+      <div class="col">
+        <p><strong>Spôsob úhrady:</strong> Bankový prevod</p>
+        <p><strong>IBAN:</strong> {{supplier.iban}}</p>
+      </div>
+
+      <div class="col text-end">
+        <p><strong>Spolu na úhradu:</strong> {{calcTotal price}} €</p>
+      </div>
+    </div>
+
+    <p class="text-center mt-4">Ďakujeme za využitie našich služieb.</p>
+  </body>
+</html>
