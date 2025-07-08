@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "Firmaren ZFA service",
   "main": "dist/index.js",
- "scripts": {
-  "dev": "ts-node src/index.ts",
-  "build": "node --no-warnings ./node_modules/typescript/lib/tsc.js && xcopy /E /I /Y src\\fonts dist\\fonts && xcopy /E /I /Y src\\templates dist\\templates",
-  "start": "node dist/index.js"
-}
-,
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc && copyfiles -u 1 src/fonts/**/* src/templates/**/* dist",
+    "start": "node dist/index.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -37,6 +36,7 @@
     "@types/node": "^22.15.2",
     "@types/nodemailer": "^6.4.17",
     "@types/pdfkit": "^0.13.9",
+    "copyfiles": "^2.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
