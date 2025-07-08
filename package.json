@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node src/index.ts",
-    "build": "tsc && copyfiles -u 1 src/fonts/**/* src/templates/**/* dist",
+"build": "tsc && cp -r src/fonts dist/fonts && cp -r src/templates dist/templates",
     "start": "node dist/index.js"
   },
   "keywords": [],
